@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>日本の今日の天気</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Open-Meteo</p>
+          <h1>日本の今日の天気</h1>
+        </div>
+        <button class="refresh-button" id="refreshButton" type="button" aria-label="天気を更新">
+          <span aria-hidden="true">↻</span>
+          更新
+        </button>
+      </header>
+
+      <section class="summary" aria-live="polite">
+        <div>
+          <span class="summary-label">対象地点</span>
+          <strong>東京・大阪・福岡・香川</strong>
+        </div>
+        <div>
+          <span class="summary-label">取得元</span>
+          <strong>Open-Meteo Forecast API</strong>
+        </div>
+        <div>
+          <span class="summary-label">状態</span>
+          <strong id="statusText">読み込み中</strong>
+        </div>
+      </section>
+
+      <section class="weather-grid" id="weatherGrid" aria-label="地点別の今日の天気"></section>
+    </main>
+
+    <template id="weatherCardTemplate">
+      <article class="weather-card">
+        <div class="card-head">
+          <div>
+            <h2 class="city-name"></h2>
+            <p class="observed-time"></p>
+          </div>
+          <div class="weather-icon" aria-hidden="true"></div>
+        </div>
+
+        <div class="temperature-row">
+          <span class="current-temp"></span>
+          <span class="weather-label"></span>
+        </div>
+
+        <dl class="metrics">
+          <div>
+            <dt>最高 / 最低</dt>
+            <dd class="temp-range"></dd>
+          </div>
+          <div>
+            <dt>降水確率</dt>
+            <dd class="rain-probability"></dd>
+          </div>
+          <div>
+            <dt>降水量</dt>
+            <dd class="precipitation"></dd>
+          </div>
+          <div>
+            <dt>風</dt>
+            <dd class="wind"></dd>
+          </div>
+        </dl>
+      </article>
+    </template>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

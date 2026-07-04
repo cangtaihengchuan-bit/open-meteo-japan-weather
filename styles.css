@@ -1,0 +1,240 @@
+:root {
+  color-scheme: light;
+  --ink: #18202a;
+  --muted: #66707d;
+  --line: #d7dde5;
+  --panel: #ffffff;
+  --page: #eef3f7;
+  --accent: #087f8c;
+  --accent-dark: #075e69;
+  --sun: #f5b841;
+  --rain: #4a90c2;
+  --cloud: #8792a2;
+  font-family:
+    "Yu Gothic", "Meiryo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(238, 243, 247, 0.96)),
+    url("https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1800&q=80");
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  color: var(--ink);
+}
+
+.app {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.05;
+}
+
+.refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.refresh-button:hover {
+  background: var(--accent-dark);
+}
+
+.refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--line);
+  margin-bottom: 18px;
+}
+
+.summary > div {
+  min-width: 0;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.summary-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.summary strong {
+  overflow-wrap: anywhere;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.weather-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(215, 221, 229, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 36px rgba(24, 32, 42, 0.09);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+}
+
+.city-name {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.observed-time {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.weather-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f2f6f8;
+  font-size: 1.9rem;
+}
+
+.temperature-row {
+  display: grid;
+  gap: 4px;
+  margin: 22px 0 18px;
+}
+
+.current-temp {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.weather-label {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.metrics {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.metrics div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e7ebf0;
+}
+
+.metrics dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.metrics dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 800;
+}
+
+.error {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px solid #f0c4bd;
+  border-radius: 8px;
+  background: #fff4f2;
+  color: #9d2d20;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .weather-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    width: min(100% - 24px, 1120px);
+    padding: 24px 0;
+  }
+
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .refresh-button {
+    width: 100%;
+  }
+
+  .weather-grid {
+    grid-template-columns: 1fr;
+  }
+}
