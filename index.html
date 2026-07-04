@@ -3,70 +3,76 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>日本の今日の天気</title>
+    <title>&#26085;&#26412;&#12398;&#20170;&#26085;&#12398;&#22825;&#27671;</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Open-Meteo</p>
-          <h1>日本の今日の天気</h1>
+          <p class="eyebrow">Open-Meteo Forecast</p>
+          <h1>&#26085;&#26412;&#12398;&#20170;&#26085;&#12398;&#22825;&#27671;</h1>
         </div>
-        <button class="refresh-button" id="refreshButton" type="button" aria-label="天気を更新">
-          <span aria-hidden="true">↻</span>
-          更新
+        <button class="refresh-button" id="refreshButton" type="button">
+          <span aria-hidden="true">&#8635;</span>
+          &#26356;&#26032;
         </button>
       </header>
 
-      <section class="summary" aria-live="polite">
+      <section class="status-panel" aria-live="polite">
         <div>
-          <span class="summary-label">対象地点</span>
-          <strong>東京・大阪・福岡・香川</strong>
+          <span class="label">&#23550;&#35937;&#22320;&#28857;</span>
+          <strong>&#26481;&#20140;&#12539;&#22823;&#38442;&#12539;&#31119;&#23713;&#12539;&#39321;&#24029;</strong>
         </div>
         <div>
-          <span class="summary-label">取得元</span>
-          <strong>Open-Meteo Forecast API</strong>
-        </div>
-        <div>
-          <span class="summary-label">状態</span>
-          <strong id="statusText">読み込み中</strong>
+          <span class="label">&#29366;&#24907;</span>
+          <strong id="statusText">&#35501;&#12415;&#36796;&#12415;&#20013;</strong>
         </div>
       </section>
 
-      <section class="weather-grid" id="weatherGrid" aria-label="地点別の今日の天気"></section>
+      <nav class="tabs" id="locationTabs" aria-label="&#22320;&#28857;&#12434;&#36984;&#25246;"></nav>
+
+      <section class="weather-stage" id="weatherStage" aria-live="polite"></section>
     </main>
 
-    <template id="weatherCardTemplate">
+    <template id="tabTemplate">
+      <button class="tab-button" type="button" role="tab">
+        <span class="tab-city"></span>
+        <span class="tab-temp"></span>
+      </button>
+    </template>
+
+    <template id="weatherTemplate">
       <article class="weather-card">
-        <div class="card-head">
+        <header class="card-head">
           <div>
+            <p class="place-label">&#20170;&#26085;&#12398;&#22825;&#27671;</p>
             <h2 class="city-name"></h2>
             <p class="observed-time"></p>
           </div>
           <div class="weather-icon" aria-hidden="true"></div>
-        </div>
+        </header>
 
-        <div class="temperature-row">
+        <div class="current-block">
           <span class="current-temp"></span>
           <span class="weather-label"></span>
         </div>
 
         <dl class="metrics">
           <div>
-            <dt>最高 / 最低</dt>
+            <dt>&#26368;&#39640; / &#26368;&#20302;</dt>
             <dd class="temp-range"></dd>
           </div>
           <div>
-            <dt>降水確率</dt>
+            <dt>&#38477;&#27700;&#30906;&#29575;</dt>
             <dd class="rain-probability"></dd>
           </div>
           <div>
-            <dt>降水量</dt>
+            <dt>&#38477;&#27700;&#37327;</dt>
             <dd class="precipitation"></dd>
           </div>
           <div>
-            <dt>風</dt>
+            <dt>&#39080;&#36895; / &#28287;&#24230;</dt>
             <dd class="wind"></dd>
           </div>
         </dl>

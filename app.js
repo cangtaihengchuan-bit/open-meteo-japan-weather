@@ -1,43 +1,50 @@
+const REQUEST_TIMEOUT_MS = 25000;
+
 const locations = [
-  { name: "東京", latitude: 35.6762, longitude: 139.6503 },
-  { name: "大阪", latitude: 34.6937, longitude: 135.5023 },
-  { name: "福岡", latitude: 33.5902, longitude: 130.4017 },
-  { name: "香川", latitude: 34.3401, longitude: 134.0434 },
+  { id: "tokyo", name: "\u6771\u4eac", latitude: 35.6762, longitude: 139.6503 },
+  { id: "osaka", name: "\u5927\u962a", latitude: 34.6937, longitude: 135.5023 },
+  { id: "fukuoka", name: "\u798f\u5ca1", latitude: 33.5902, longitude: 130.4017 },
+  { id: "kagawa", name: "\u9999\u5ddd", latitude: 34.3401, longitude: 134.0434 },
 ];
 
 const weatherLabels = new Map([
-  [0, ["快晴", "☀"]],
-  [1, ["晴れ", "🌤"]],
-  [2, ["一部曇り", "⛅"]],
-  [3, ["曇り", "☁"]],
-  [45, ["霧", "🌫"]],
-  [48, ["着氷性の霧", "🌫"]],
-  [51, ["弱い霧雨", "🌦"]],
-  [53, ["霧雨", "🌦"]],
-  [55, ["強い霧雨", "🌧"]],
-  [61, ["弱い雨", "🌧"]],
-  [63, ["雨", "🌧"]],
-  [65, ["強い雨", "🌧"]],
-  [66, ["弱い凍雨", "🌧"]],
-  [67, ["強い凍雨", "🌧"]],
-  [71, ["弱い雪", "🌨"]],
-  [73, ["雪", "🌨"]],
-  [75, ["強い雪", "🌨"]],
-  [77, ["雪粒", "🌨"]],
-  [80, ["弱いにわか雨", "🌦"]],
-  [81, ["にわか雨", "🌦"]],
-  [82, ["強いにわか雨", "⛈"]],
-  [85, ["弱いにわか雪", "🌨"]],
-  [86, ["強いにわか雪", "🌨"]],
-  [95, ["雷雨", "⛈"]],
-  [96, ["ひょうを伴う雷雨", "⛈"]],
-  [99, ["強いひょうを伴う雷雨", "⛈"]],
+  [0, ["\u5feb\u6674", "\u2600"]],
+  [1, ["\u6674\u308c", "\u2600"]],
+  [2, ["\u4e00\u90e8\u66c7\u308a", "\u26c5"]],
+  [3, ["\u66c7\u308a", "\u2601"]],
+  [45, ["\u9727", "\ud83c\udf2b"]],
+  [48, ["\u7740\u6c37\u6027\u306e\u9727", "\ud83c\udf2b"]],
+  [51, ["\u5f31\u3044\u9727\u96e8", "\ud83c\udf26"]],
+  [53, ["\u9727\u96e8", "\ud83c\udf26"]],
+  [55, ["\u5f37\u3044\u9727\u96e8", "\ud83c\udf27"]],
+  [61, ["\u5f31\u3044\u96e8", "\ud83c\udf27"]],
+  [63, ["\u96e8", "\ud83c\udf27"]],
+  [65, ["\u5f37\u3044\u96e8", "\ud83c\udf27"]],
+  [66, ["\u5f31\u3044\u51cd\u96e8", "\ud83c\udf27"]],
+  [67, ["\u5f37\u3044\u51cd\u96e8", "\ud83c\udf27"]],
+  [71, ["\u5f31\u3044\u96ea", "\ud83c\udf28"]],
+  [73, ["\u96ea", "\ud83c\udf28"]],
+  [75, ["\u5f37\u3044\u96ea", "\ud83c\udf28"]],
+  [77, ["\u96ea\u7c92", "\ud83c\udf28"]],
+  [80, ["\u5f31\u3044\u306b\u308f\u304b\u96e8", "\ud83c\udf26"]],
+  [81, ["\u306b\u308f\u304b\u96e8", "\ud83c\udf26"]],
+  [82, ["\u5f37\u3044\u306b\u308f\u304b\u96e8", "\u26c8"]],
+  [85, ["\u5f31\u3044\u306b\u308f\u304b\u96ea", "\ud83c\udf28"]],
+  [86, ["\u5f37\u3044\u306b\u308f\u304b\u96ea", "\ud83c\udf28"]],
+  [95, ["\u96f7\u96e8", "\u26c8"]],
+  [96, ["\u3072\u3087\u3046\u3092\u4f34\u3046\u96f7\u96e8", "\u26c8"]],
+  [99, ["\u5f37\u3044\u3072\u3087\u3046\u3092\u4f34\u3046\u96f7\u96e8", "\u26c8"]],
 ]);
 
-const grid = document.querySelector("#weatherGrid");
+const tabs = document.querySelector("#locationTabs");
+const stage = document.querySelector("#weatherStage");
 const statusText = document.querySelector("#statusText");
 const refreshButton = document.querySelector("#refreshButton");
-const template = document.querySelector("#weatherCardTemplate");
+const tabTemplate = document.querySelector("#tabTemplate");
+const weatherTemplate = document.querySelector("#weatherTemplate");
+
+let weatherResults = [];
+let selectedLocationId = locations[0].id;
 
 refreshButton.addEventListener("click", loadWeather);
 
@@ -45,19 +52,20 @@ loadWeather();
 
 async function loadWeather() {
   setLoading(true);
-  grid.replaceChildren();
+  tabs.replaceChildren();
+  stage.replaceChildren(renderNotice("\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3057\u3066\u3044\u307e\u3059\u3002"));
 
   try {
-    const results = await Promise.all(locations.map(fetchWeather));
-    results.forEach(renderWeatherCard);
-    statusText.textContent = `${formatDateTime(new Date())} 更新`;
+    weatherResults = await Promise.all(locations.map(fetchWeather));
+    renderTabs();
+    renderSelectedWeather();
+    statusText.textContent = `${formatDateTime(new Date())} \u66f4\u65b0`;
   } catch (error) {
     console.error(error);
-    const message = document.createElement("p");
-    message.className = "error";
-    message.textContent = "天気情報を取得できませんでした。ネットワーク接続を確認して、もう一度お試しください。";
-    grid.append(message);
-    statusText.textContent = "取得失敗";
+    stage.replaceChildren(
+      renderNotice("\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u6642\u9593\u3092\u304a\u3044\u3066\u66f4\u65b0\u3057\u3066\u304f\u3060\u3055\u3044\u3002", true),
+    );
+    statusText.textContent = "\u53d6\u5f97\u5931\u6557";
   } finally {
     setLoading(false);
   }
@@ -65,7 +73,7 @@ async function loadWeather() {
 
 async function fetchWeather(location) {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const params = new URLSearchParams({
     latitude: location.latitude,
     longitude: location.longitude,
@@ -92,32 +100,66 @@ async function fetchWeather(location) {
   }
 }
 
-function renderWeatherCard({ location, data }) {
-  const card = template.content.firstElementChild.cloneNode(true);
+function renderTabs() {
+  const fragment = document.createDocumentFragment();
+
+  weatherResults.forEach((result) => {
+    const tab = tabTemplate.content.firstElementChild.cloneNode(true);
+    const { location, data } = result;
+    tab.id = `tab-${location.id}`;
+    tab.setAttribute("aria-controls", "weatherStage");
+    tab.setAttribute("aria-selected", String(location.id === selectedLocationId));
+    tab.dataset.locationId = location.id;
+    tab.querySelector(".tab-city").textContent = location.name;
+    tab.querySelector(".tab-temp").textContent = `${round(data.current.temperature_2m)}\u00b0C`;
+    tab.addEventListener("click", () => {
+      selectedLocationId = location.id;
+      renderTabs();
+      renderSelectedWeather();
+    });
+    fragment.append(tab);
+  });
+
+  tabs.replaceChildren(fragment);
+}
+
+function renderSelectedWeather() {
+  const result = weatherResults.find((item) => item.location.id === selectedLocationId);
+  if (!result) return;
+
+  const card = weatherTemplate.content.firstElementChild.cloneNode(true);
+  const { location, data } = result;
   const current = data.current;
   const daily = data.daily;
   const code = current.weather_code ?? daily.weather_code?.[0];
-  const [label, icon] = weatherLabels.get(code) ?? ["不明", "—"];
+  const [label, icon] = weatherLabels.get(code) ?? ["\u4e0d\u660e", "\u2014"];
 
   card.querySelector(".city-name").textContent = location.name;
-  card.querySelector(".observed-time").textContent = `${formatApiTime(current.time)} 時点`;
+  card.querySelector(".observed-time").textContent = `${formatApiTime(current.time)} \u6642\u70b9`;
   card.querySelector(".weather-icon").textContent = icon;
-  card.querySelector(".current-temp").textContent = `${round(current.temperature_2m)}°C`;
+  card.querySelector(".current-temp").textContent = `${round(current.temperature_2m)}\u00b0C`;
   card.querySelector(".weather-label").textContent = label;
   card.querySelector(".temp-range").textContent =
-    `${round(daily.temperature_2m_max?.[0])}° / ${round(daily.temperature_2m_min?.[0])}°`;
+    `${round(daily.temperature_2m_max?.[0])}\u00b0 / ${round(daily.temperature_2m_min?.[0])}\u00b0`;
   card.querySelector(".rain-probability").textContent =
     `${daily.precipitation_probability_max?.[0] ?? "--"}%`;
   card.querySelector(".precipitation").textContent = `${round(daily.precipitation_sum?.[0])} mm`;
   card.querySelector(".wind").textContent =
-    `${round(current.wind_speed_10m)} km/h・湿度 ${current.relative_humidity_2m ?? "--"}%`;
+    `${round(current.wind_speed_10m)} km/h / ${current.relative_humidity_2m ?? "--"}%`;
 
-  grid.append(card);
+  stage.replaceChildren(card);
+}
+
+function renderNotice(text, isError = false) {
+  const notice = document.createElement("p");
+  notice.className = isError ? "notice error" : "notice";
+  notice.textContent = text;
+  return notice;
 }
 
 function setLoading(isLoading) {
   refreshButton.disabled = isLoading;
-  statusText.textContent = isLoading ? "読み込み中" : statusText.textContent;
+  if (isLoading) statusText.textContent = "\u8aad\u307f\u8fbc\u307f\u4e2d";
 }
 
 function round(value) {
