@@ -1,29 +1,13 @@
 # Open-Meteo Japan Weather
 
-A small static web app that shows today's weather for selected locations in Japan using the Open-Meteo Forecast API.
+気象庁の予報JSONを使った、1枚HTMLの天気アプリです。
 
-## Locations
+## 表示都市
 
-- Tokyo
-- Osaka
-- Fukuoka
-- Kagawa
+- 高松
+- 東京
+- 大阪
 
-## Features
+## 使い方
 
-- Location tabs for switching between cities and prefectures
-- Batched Open-Meteo request for all locations
-- One-day forecast data to keep the response small
-- Displayed load duration after each successful update
-- Current weather and temperature
-- Daily high and low temperature
-- Precipitation probability and precipitation amount
-- Wind speed and humidity
-
-## Local Preview
-
-Open `index.html` in a browser, or serve the folder with any static file server.
-
-```powershell
-npx serve .
-```
+`index.html` をブラウザで開くと、そのまま動作します。
