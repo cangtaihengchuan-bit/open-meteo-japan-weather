@@ -336,9 +336,9 @@
       const cache = new Map();
       let selectedCityId = cities[0].id;
 
-      refreshButton.addEventListener("click", () => loadWeather(selectedCityId, true));
+      refreshButton.addEventListener("click", () => loadAllWeather(true));
       renderCityButtons();
-      loadWeather(selectedCityId);
+      loadAllWeather();
 
       function renderCityButtons() {
         switcher.replaceChildren(
@@ -355,11 +355,53 @@
             button.addEventListener("click", () => {
               selectedCityId = city.id;
               renderCityButtons();
-              loadWeather(city.id);
+              renderSelectedWeather();
             });
             return button;
           }),
         );
+      }
+
+      async function loadAllWeather(forceRefresh = false) {
+        setLoading(true);
+        weatherCard.replaceChildren(renderNotice("各地の天気情報を取得しています。"));
+
+        try {
+          const results = await Promise.allSettled(
+            cities.map(async (city) => {
+              if (cache.has(city.id) && !forceRefresh) return cache.get(city.id);
+              const data = await fetchWeather(city);
+              cache.set(city.id, data);
+              return data;
+            }),
+          );
+
+          const selectedResult = results[cities.findIndex((city) => city.id === selectedCityId)];
+          renderCityButtons();
+
+          if (selectedResult?.status === "rejected" && !cache.has(selectedCityId)) {
+            throw selectedResult.reason;
+          }
+
+          renderSelectedWeather();
+        } catch (error) {
+          console.error(error);
+          weatherCard.replaceChildren(
+            renderNotice(
+              "気象庁の天気情報を取得できませんでした。通信状態を確認して、更新ボタンで再取得してください。",
+              true,
+            ),
+          );
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function renderSelectedWeather() {
+        const city = cities.find((item) => item.id === selectedCityId);
+        const data = cache.get(selectedCityId);
+        if (!city || !data) return;
+        renderWeather(city, data);
       }
 
       async function loadWeather(cityId, forceRefresh = false) {
