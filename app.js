@@ -1,4 +1,4 @@
-const REQUEST_TIMEOUT_MS = 25000;
+const REQUEST_TIMEOUT_MS = 180000;
 
 const locations = [
   { id: "tokyo", name: "\u6771\u4eac", latitude: 35.6762, longitude: 139.6503 },
@@ -53,22 +53,41 @@ loadWeather();
 async function loadWeather() {
   setLoading(true);
   tabs.replaceChildren();
-  stage.replaceChildren(renderNotice("\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3057\u3066\u3044\u307e\u3059\u3002"));
+  stage.replaceChildren(renderNotice("\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3057\u3066\u3044\u307e\u3059\u3002\u6700\u59273\u5206\u307b\u3069\u304b\u304b\u308b\u5834\u5408\u304c\u3042\u308a\u307e\u3059\u3002"));
 
-  try {
-    weatherResults = await Promise.all(locations.map(fetchWeather));
-    renderTabs();
-    renderSelectedWeather();
-    statusText.textContent = `${formatDateTime(new Date())} \u66f4\u65b0`;
-  } catch (error) {
-    console.error(error);
+  const settledResults = await Promise.allSettled(locations.map(fetchWeather));
+  weatherResults = settledResults.map((result, index) => {
+    if (result.status === "fulfilled") return result.value;
+
+    console.error(result.reason);
+    return {
+      location: locations[index],
+      data: null,
+      error: result.reason,
+    };
+  });
+
+  renderTabs();
+
+  if (weatherResults.every((result) => !result.data)) {
     stage.replaceChildren(
-      renderNotice("\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u6642\u9593\u3092\u304a\u3044\u3066\u66f4\u65b0\u3057\u3066\u304f\u3060\u3055\u3044\u3002", true),
+      renderNotice("\u3059\u3079\u3066\u306e\u5730\u70b9\u3067\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002Open-Meteo\u3078\u306e\u63a5\u7d9a\u72b6\u614b\u3092\u78ba\u8a8d\u3057\u3001\u6642\u9593\u3092\u304a\u3044\u3066\u66f4\u65b0\u3057\u3066\u304f\u3060\u3055\u3044\u3002", true),
     );
     statusText.textContent = "\u53d6\u5f97\u5931\u6557";
-  } finally {
     setLoading(false);
+    return;
   }
+
+  if (!weatherResults.some((result) => result.location.id === selectedLocationId && result.data)) {
+    selectedLocationId = weatherResults.find((result) => result.data).location.id;
+  }
+
+  renderTabs();
+  renderSelectedWeather();
+  statusText.textContent = weatherResults.some((result) => !result.data)
+    ? `${formatDateTime(new Date())} \u4e00\u90e8\u53d6\u5f97`
+    : `${formatDateTime(new Date())} \u66f4\u65b0`;
+  setLoading(false);
 }
 
 async function fetchWeather(location) {
@@ -111,7 +130,9 @@ function renderTabs() {
     tab.setAttribute("aria-selected", String(location.id === selectedLocationId));
     tab.dataset.locationId = location.id;
     tab.querySelector(".tab-city").textContent = location.name;
-    tab.querySelector(".tab-temp").textContent = `${round(data.current.temperature_2m)}\u00b0C`;
+    tab.querySelector(".tab-temp").textContent = data
+      ? `${round(data.current.temperature_2m)}\u00b0C`
+      : "\u53d6\u5f97\u5931\u6557";
     tab.addEventListener("click", () => {
       selectedLocationId = location.id;
       renderTabs();
@@ -126,6 +147,13 @@ function renderTabs() {
 function renderSelectedWeather() {
   const result = weatherResults.find((item) => item.location.id === selectedLocationId);
   if (!result) return;
+
+  if (!result.data) {
+    stage.replaceChildren(
+      renderNotice(`${result.location.name}\u306e\u5929\u6c17\u60c5\u5831\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3067\u3057\u305f\u3002\u66f4\u65b0\u30dc\u30bf\u30f3\u3067\u518d\u53d6\u5f97\u3067\u304d\u307e\u3059\u3002`, true),
+    );
+    return;
+  }
 
   const card = weatherTemplate.content.firstElementChild.cloneNode(true);
   const { location, data } = result;
